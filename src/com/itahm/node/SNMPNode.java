@@ -96,7 +96,7 @@ abstract public class SNMPNode extends ICMPNode implements Closeable {
 		return pdu;
 	}
 	
-	abstract public PDU createPDU();
+	abstract protected PDU createPDU();
 	abstract public boolean hasNextPDU(OID response, Variable variable, OID request) throws IOException;
 	
 }

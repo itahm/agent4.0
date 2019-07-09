@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.ByteBuffer;
@@ -15,8 +18,10 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Enumeration;
 
 import com.itahm.json.JSONException;
 import com.itahm.json.JSONObject;
@@ -36,12 +41,12 @@ public class Util {
 		}
 	}
 	
-	public static Object loadClass(URL url, String name) throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException {
+	public static Object loadClass(URL url, String name) throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 		try (URLClassLoader urlcl = new URLClassLoader(new URL [] {
 				url
 			})) {
 			
-			return urlcl.loadClass(name).newInstance();
+			return urlcl.loadClass(name).getDeclaredConstructor().newInstance();
 		}
 	}
 	
@@ -168,4 +173,49 @@ public class Util {
 			}
 		}
 	}
+	
+	public final static boolean isValidAddress(byte [] mac) {
+		Enumeration<NetworkInterface> e;
+		
+		try {
+			e = NetworkInterface.getNetworkInterfaces();
+		
+			NetworkInterface ni;
+			byte [] ba;
+			
+			while(e.hasMoreElements()) {
+				ni = e.nextElement();
+				
+				if (ni.isUp() && !ni.isLoopback() && !ni.isVirtual()) {
+					 ba = ni.getHardwareAddress();
+					 
+					 if(ba!= null) {
+						 if (Arrays.equals(mac, ba)) {
+							 return true; 
+						 }
+					 }
+				}
+			}
+		} catch (SocketException se) {
+		}
+		
+		return false;
+	}
+	
+	public final static boolean isValidAddress(String mac) {
+		try {
+			long l = Long.parseLong(mac, 16);
+			byte [] ba = new byte[6];
+			
+			for (int i=6; i>0; l>>=8) {
+				ba[--i] = (byte)(0xff & l);
+			}
+			
+			return isValidAddress(ba);
+				
+		} catch (NumberFormatException nfe) {}
+		
+		return false;
+	}
+	
 }

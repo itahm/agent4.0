@@ -1025,17 +1025,19 @@ abstract public class ITAhMNode extends SNMPNode {
 					continue;
 				}
 				
-				long capacity = 0;
+				Long capacity = this.speed.get(index);
 				
 				//custom speed가 있는 경우
-				if (this.speed.containsKey(index)) {
-					capacity = this.speed.get(index);
-				}
-				else if (indexData.has("ifHighSpeed")) {
-					capacity = indexData.getLong("ifHighSpeed");
-				}
-				else if (indexData.has("ifSpeed")) {
-					capacity = indexData.getLong("ifSpeed");
+				if (capacity == null) {
+					if (indexData.has("ifHighSpeed")) {
+						capacity = indexData.getLong("ifHighSpeed");
+					}
+					else if (indexData.has("ifSpeed")) {
+						capacity = indexData.getLong("ifSpeed");
+					}
+					else {
+						continue;	
+					}
 				}
 				
 				if (capacity <= 0) {

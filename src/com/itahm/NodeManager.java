@@ -151,11 +151,10 @@ public class NodeManager extends Snmp implements NodeListener {
 	 */
 	public void onSearch(String ip, String profile) throws IOException {
 		synchronized(this.index) {
-			String id;
+			String id= this.index.get(ip);
 			JSONObject base;
 			
-			if (this.index.containsKey(ip)) {
-				id = this.index.get(ip);
+			if (id != null) {
 				base = this.nodeTable.json().getJSONObject(id);
 				
 				if (base.has("protocol")) {
